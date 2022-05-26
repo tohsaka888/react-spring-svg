@@ -1,35 +1,77 @@
 import { useDrag } from "@use-gesture/react";
-import React from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { useSpring, animated, config } from "react-spring";
-import { Position } from "../../type";
-import { PointContainer } from "./index.style";
-
-function Point({ x = 0, y = 0 }: Position) {
+import { LineContext } from "../../Context/LineContext";
+import { PointsContext } from "../../Context/PointsContext";
+import { Entity, POINT, Position } from "../../type";
+import { PointContainer, PointName } from "./index.style";
+function Point({
+  x = 0,
+  y = 0,
+  d = 50,
+  id,
+  name,
+  label,
+}: Position & POINT & Entity) {
   const [position, setPosition] = useSpring(() => ({
     x: x,
     y: y,
     config: config.stiff,
   }));
 
+  const { lines } = useContext(LineContext)!;
+
+  const pointRef = useRef<SVGForeignObjectElement>(null!);
+
+  const { setPoints } = useContext(PointsContext)!;
+
+  const edges = lines.filter((line) => line.current.id.includes(id));
+  const fromLines = edges.filter((line) => line.current.id.indexOf(id) === 0);
+  const toLines = edges.filter((line) => line.current.id.indexOf(id) !== 0);
+
   const drag = useDrag(
     ({ event, offset: [ox, oy] }) => {
       // 阻止事件冒泡
       event.stopPropagation();
       event.preventDefault();
-      setPosition.start({ x: ox, y: oy, immediate: true });
+      setPosition.start({ x: ox + x, y: oy + y, immediate: true });
+      fromLines.forEach((line) => {
+        const originPath = line.current.attributes[0].value;
+        const tempArr = originPath.split("L");
+        const newPath = `M ${ox + x + d / 2} ${oy + y + d / 2} L${tempArr[1]}`;
+        line.current.attributes[0].value = newPath;
+      });
+      toLines.forEach((line) => {
+        const originPath = line.current.attributes[0].value;
+        const tempArr = originPath.split("L");
+        const newPath = `${tempArr[0]} L ${ox + x + d / 2} ${oy + y + d / 2}`;
+        line.current.attributes[0].value = newPath;
+      });
     },
     {
       filterTaps: true,
+      pointer: {
+        capture: true,
+      },
     }
   );
+
+  useEffect(() => {
+    if (pointRef) {
+      setPoints((points) => [...points, pointRef]);
+    }
+  }, [setPoints]);
 
   return (
     <animated.foreignObject
       {...drag()}
       {...position}
-      style={{ width: "100px", height: "100px", touchAction: "none" }}
+      id={id}
+      style={{ width: d + 10, height: d + 30, touchAction: "none" }}
+      ref={pointRef}
     >
-      <PointContainer>Point</PointContainer>
+      <PointContainer d={d}>{label}</PointContainer>
+      <PointName width={d + 5}>{name}</PointName>
     </animated.foreignObject>
   );
 }
