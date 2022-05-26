@@ -9,6 +9,7 @@ export const PointContainer = styled(Flex) <{ d: number }>`
   background-color: black;
   color: #fff;
   user-select: none;
+  font-size: 12px;
 `
 
 export const PointName = styled.div<{ width: number }>`
