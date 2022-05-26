@@ -6,7 +6,7 @@ import { LineContext } from "../../Context/LineContext";
 import { PointsContext } from "../../Context/PointsContext";
 import { Entity, POINT, Position } from "../../type";
 import { PointContainer, PointName } from "./index.style";
-function Point({
+const Point = React.memo(function ({
   x = 0,
   y = 0,
   d = 50,
@@ -31,12 +31,14 @@ function Point({
   const fromLines = edges.filter((line) => line.current.id.indexOf(id) === 0);
   const toLines = edges.filter((line) => line.current.id.indexOf(id) !== 0);
 
+  console.log("rerender");
+
   const drag = useDrag(
     ({ event, offset: [ox, oy] }) => {
       // 阻止事件冒泡
       event.stopPropagation();
       event.preventDefault();
-      console.log(scaleSize);
+
       let newX = ox / scaleSize + x;
       let newY = oy / scaleSize + y;
       setPosition.start({ x: newX, y: newY, immediate: true });
@@ -79,6 +81,6 @@ function Point({
       <PointName width={d + 5}>{name}</PointName>
     </animated.foreignObject>
   );
-}
+});
 
 export default Point;
