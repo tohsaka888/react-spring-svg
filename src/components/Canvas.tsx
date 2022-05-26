@@ -1,5 +1,5 @@
 import React, { ReactNode, useState } from "react";
-import { animated, useSpring } from "react-spring";
+import { animated, config, useSpring } from "react-spring";
 import { useDrag, useWheel } from "@use-gesture/react";
 import { Position } from "../type";
 
@@ -18,6 +18,7 @@ function Canvas({ children, dragAble = true }: Props) {
 
   const [dragStyle, setDragStyle] = useSpring(() => ({
     transform: "translate(0, 0)",
+    config: config.stiff,
   }));
 
   const canvasWheel = useWheel(({ event, memo }) => {
