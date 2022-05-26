@@ -22,7 +22,6 @@ function App() {
   const [lines, setLines] = useState<MutableRefObject<SVGPathElement>[]>([]);
   const formatData = useCallback(() => {
     let centerPoint: Entity[] = [];
-    let model: Entity[] = [];
     let defaultPoint: Entity[] = [];
     let datameta: Entity[] = [];
     let codeInfo: Entity[] = [];
@@ -30,7 +29,7 @@ function App() {
     let assetField: Entity[] = [];
     fake_data.data.entities.forEach((item) => {
       if (item.label === "model") {
-        setModel([...model, item]);
+        setModel((model) => [...model, item]);
       } else if (item.label === "asset") {
         centerPoint.push(item);
       } else if (item.label === "property") {
@@ -64,11 +63,13 @@ function App() {
                   fromId="model3058461587483181059"
                   toId="property3058461587483181063"
                   name={""}
+                  d={50}
                 />
                 <Line
                   fromId="model3058461587483181059"
                   toId="property3058461587483181062"
                   name={""}
+                  d={50}
                 />
               </>
             )}
