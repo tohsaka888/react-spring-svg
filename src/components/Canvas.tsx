@@ -2,6 +2,7 @@ import React, { ReactNode, useState } from "react";
 import { animated, config, useSpring } from "react-spring";
 import { useDrag, useWheel } from "@use-gesture/react";
 import { Position } from "../type";
+import { CanvasContext } from "../Context/CanvasContext";
 
 type Props = {
   children?: ReactNode;
@@ -37,16 +38,21 @@ function Canvas({ children, dragAble = true }: Props) {
     return currentSize;
   });
 
-  const canvasDrag = useDrag(({ event, delta, cancel }) => {
-    event.stopPropagation();
-    !dragAble && cancel();
-    let x = position.x + delta[0];
-    let y = position.y + delta[1];
-    setDragStyle.start({
-      transform: `translate(${x}, ${y})`,
-    });
-    setPosition((pos) => ({ x: pos.x + delta[0], y: pos.y + delta[1] }));
-  });
+  const canvasDrag = useDrag(
+    ({ event, delta, cancel }) => {
+      event.stopPropagation();
+      !dragAble && cancel();
+      let x = position.x + delta[0];
+      let y = position.y + delta[1];
+      setDragStyle.start({
+        transform: `translate(${x}, ${y})`,
+      });
+      setPosition((pos) => ({ x: pos.x + delta[0], y: pos.y + delta[1] }));
+    },
+    {
+      filterTaps: true,
+    }
+  );
 
   return (
     <svg
@@ -59,9 +65,11 @@ function Canvas({ children, dragAble = true }: Props) {
       {...canvasWheel()}
       {...canvasDrag()}
     >
-      <animated.g {...dragStyle}>
-        <animated.g {...wheelStyle}>{children}</animated.g>
-      </animated.g>
+      <CanvasContext.Provider value={{ scaleSize, setScaleSize }}>
+        <animated.g {...dragStyle}>
+          <animated.g {...wheelStyle}>{children}</animated.g>
+        </animated.g>
+      </CanvasContext.Provider>
     </svg>
   );
 }

@@ -1,6 +1,7 @@
 import { useDrag } from "@use-gesture/react";
 import React, { useContext, useEffect, useRef } from "react";
 import { useSpring, animated, config } from "react-spring";
+import { CanvasContext } from "../../Context/CanvasContext";
 import { LineContext } from "../../Context/LineContext";
 import { PointsContext } from "../../Context/PointsContext";
 import { Entity, POINT, Position } from "../../type";
@@ -20,6 +21,7 @@ function Point({
   }));
 
   const { lines } = useContext(LineContext)!;
+  const { scaleSize } = useContext(CanvasContext)!;
 
   const pointRef = useRef<SVGForeignObjectElement>(null!);
 
@@ -34,17 +36,20 @@ function Point({
       // 阻止事件冒泡
       event.stopPropagation();
       event.preventDefault();
-      setPosition.start({ x: ox + x, y: oy + y, immediate: true });
+      console.log(scaleSize);
+      let newX = ox / scaleSize + x;
+      let newY = oy / scaleSize + y;
+      setPosition.start({ x: newX, y: newY, immediate: true });
       fromLines.forEach((line) => {
         const originPath = line.current.attributes[0].value;
         const tempArr = originPath.split("L");
-        const newPath = `M ${ox + x + d / 2} ${oy + y + d / 2} L${tempArr[1]}`;
+        const newPath = `M ${newX + d / 2} ${newY + d / 2} L${tempArr[1]}`;
         line.current.attributes[0].value = newPath;
       });
       toLines.forEach((line) => {
         const originPath = line.current.attributes[0].value;
         const tempArr = originPath.split("L");
-        const newPath = `${tempArr[0]} L ${ox + x + d / 2} ${oy + y + d / 2}`;
+        const newPath = `${tempArr[0]} L ${newX + d / 2} ${newY + d / 2}`;
         line.current.attributes[0].value = newPath;
       });
     },
